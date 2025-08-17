@@ -16,7 +16,7 @@ Una aplicación GUI moderna y simplificada para gestionar archivos en dispositiv
 ## 🖥️ Interfaz
 
 ### Pantalla Principal
-![Pantalla Principal](screenshots/main_screen.png)
+![Pantalla Principal](https://github.com/reproteq/ADB_Manager/blob/main/screenshots/conectado.png?raw=true)
 
 La interfaz principal muestra:
 - **Sección de Conexión**: IP, Puerto, Código de emparejamiento
@@ -25,7 +25,7 @@ La interfaz principal muestra:
 - **Log en tiempo real**: Feedback detallado de todas las operaciones
 
 ### Proceso de Emparejamiento
-![Emparejamiento](screenshots/pairing_process.png)
+![Emparejamiento](https://github.com/reproteq/ADB_Manager/blob/main/screenshots/emparejamiento.png?raw=true)
 
 1. **Configura WiFi Debugging** en tu dispositivo
 2. **Introduce** IP, puerto y código mostrados
@@ -33,19 +33,26 @@ La interfaz principal muestra:
 4. **Conecta** con el puerto de conexión
 
 ### Gestión de Archivos
-![Gestión de Archivos](screenshots/file_management.png)
+![Gestión de Archivos](https://github.com/reproteq/ADB_Manager/blob/main/screenshots/archivo_seleccionado.png?raw=true)
 
 - **Selecciona archivos** de cualquier tipo
 - **Instalación automática** para APKs
 - **Transferencia universal** para documentos, imágenes, videos, etc.
 - **Progreso visual** con barras de estado
 
-### Instalación Exitosa
-![Instalación APK](screenshots/apk_installation.png)
+### Instalación de APK
+![Instalación APK](https://github.com/reproteq/ADB_Manager/blob/main/screenshots/instalando_apk.png?raw=true)
 
 - **Instalación robusta** con reinicio automático de ADB
 - **Detección de conflictos** y resolución automática
+- **Proceso transparente** con feedback en tiempo real
+
+### Instalación Exitosa
+![APK Instalado](https://github.com/reproteq/ADB_Manager/blob/main/screenshots/apk_instalado.png?raw=true)
+
 - **Confirmación visual** del éxito de la operación
+- **Mensajes claros** de éxito o error
+- **Integración perfecta** con el sistema
 
 ## 🚀 Instalación
 
@@ -58,8 +65,8 @@ La interfaz principal muestra:
 
 1. **Clona el repositorio**
 ```bash
-git clone https://github.com/tu-usuario/adb_manager.git
-cd adb_manager
+git clone https://github.com/reproteq/ADB_Manager.git
+cd ADB_Manager
 ```
 
 2. **Instala ADB** (Android SDK Platform Tools)
@@ -136,15 +143,15 @@ python adb_file_manager.py
 
 ### Estructura del Proyecto
 ```
-adb_manager/
+ADB_Manager/
 ├── adb_file_manager.py    # Aplicación principal
 ├── README.md              # Este archivo
-├── screenshots/           # Capturas de pantalla
-│   ├── main_screen.png
-│   ├── pairing_process.png
-│   ├── file_management.png
-│   └── apk_installation.png
-└── requirements.txt       # Dependencias (opcional)
+└── screenshots/           # Capturas de pantalla
+    ├── conectado.png
+    ├── emparejamiento.png
+    ├── archivo_seleccionado.png
+    ├── instalando_apk.png
+    └── apk_instalado.png
 ```
 
 ### Funcionalidades Técnicas
