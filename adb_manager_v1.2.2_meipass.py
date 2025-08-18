@@ -16,8 +16,8 @@ COMPANY = "REPROTEQ 2025"
 DEFAULT_IP = "192.168.1.80"
 
 # CONFIGURACIÓN DE VENTANA
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 1000
+WINDOW_WIDTH = 1000
+WINDOW_HEIGHT = 850
 
 def get_resource_path(relative_path):
     """Obtener ruta de recursos incluidos en el ejecutable"""

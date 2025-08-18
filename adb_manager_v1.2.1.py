@@ -6,7 +6,6 @@ import os
 import time
 import socket
 import platform
-import sys
 
 # ========== CONFIGURACIÓN GLOBAL ==========
 APP_VERSION = "1.2"
@@ -15,42 +14,11 @@ DEVELOPER = "Alex G.T"
 COMPANY = "REPROTEQ 2025"
 DEFAULT_IP = "192.168.1.80"
 
-# CONFIGURACIÓN DE VENTANA
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 1000
-
-def get_resource_path(relative_path):
-    """Obtener ruta de recursos incluidos en el ejecutable"""
-    try:
-        # PyInstaller crea una carpeta temporal y almacena la ruta en _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    
-    return os.path.join(base_path, relative_path)
-
-def get_adb_path():
-    """Obtener ruta del adb.exe incluido"""
-    # Intentar diferentes ubicaciones
-    possible_paths = [
-        get_resource_path("adb_tools/adb.exe"),  # Empaquetado
-        get_resource_path("adb.exe"),            # En la raíz
-        os.path.join(os.path.dirname(sys.executable), "adb_tools", "adb.exe"),  # Junto al exe
-        os.path.join(os.path.dirname(sys.executable), "adb.exe"),  # Junto al exe directo
-        "adb"  # PATH del sistema (fallback)
-    ]
-    
-    for path in possible_paths:
-        if os.path.exists(path):
-            return path
-    
-    return "adb"  # Fallback al PATH del sistema
-
 class ADBFileManagerFixed:
     def __init__(self, root):
         self.root = root
         self.root.title(f"{APP_TITLE} v.{APP_VERSION}")
-        self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
+        self.root.geometry("900x700")
         self.root.configure(bg='#2c3e50')
         
         # Variables
@@ -311,58 +279,29 @@ class ADBFileManagerFixed:
         tk.Label(quick_frame, text="Comandos rápidos:", fg='#95a5a6', bg='#34495e', 
                 font=('Arial', 9)).pack(anchor='w')
         
-        # Frame de comandos rápidos
-        quick_frame = tk.Frame(console_frame, bg='#34495e')
-        quick_frame.pack(fill='x', padx=10, pady=5)
+        quick_buttons_frame = tk.Frame(quick_frame, bg='#34495e')
+        quick_buttons_frame.pack(fill='x', pady=2)
         
-        tk.Label(quick_frame, text="Comandos rápidos:", fg='#95a5a6', bg='#34495e', 
-                font=('Arial', 9)).pack(anchor='w')
-        
-        # Comandos organizados de forma más compacta
         quick_commands = [
-            # Fila 1 - Básicos
             ("📱 devices", "adb devices"),
-            ("ℹ️ info", "adb shell getprop ro.build.version.release"),
             ("🔄 reboot", "adb reboot"),
             ("🏠 shell", "adb shell"),
-            ("📊 logcat", "adb logcat -d"),
-            
-            # Fila 2 - Archivos
-            ("🗂️ /sdcard", "adb shell ls -la /sdcard"),
-            ("📥 Download", "adb shell ls -la /sdcard/Download"),
-            ("💾 storage", "adb shell df -h"),
-            ("🔋 battery", "adb shell dumpsys battery | grep level"),
-            ("📋 packages", "adb shell pm list packages -3"),
-            
-            # Fila 3 - Sistema
-            ("🔢 processes", "adb shell ps"),
-            ("📊 meminfo", "adb shell cat /proc/meminfo | head -10"),
-            ("🔊 volume", "adb shell media volume --show"),
-            ("💡 brightness", "adb shell settings get system screen_brightness"),
-            ("📡 wifi", "adb shell dumpsys wifi | head -20"),
-            
-            # Fila 4 - Avanzado
-            ("🗑️ uninstall", "adb uninstall"),
-            ("⚡ recovery", "adb reboot recovery"),
-            ("✈️ airplane", "adb shell settings get global airplane_mode_on"),
-            ("📶 data", "adb shell svc data enable"),
-            ("🧹 clear", "clear")
+            ("📊 logcat", "adb logcat"),
+            ("🗂️ ls /sdcard", "adb shell ls /sdcard"),
+            ("💾 df -h", "adb shell df -h"),
         ]
         
-        # Crear botones en filas de 5
-        buttons_per_row = 5
-        for i in range(0, len(quick_commands), buttons_per_row):
-            row_frame = tk.Frame(quick_frame, bg='#34495e')
-            row_frame.pack(fill='x', pady=1)
+        for i, (text, cmd) in enumerate(quick_commands):
+            btn = tk.Button(quick_buttons_frame, text=text, 
+                           command=lambda c=cmd: self.set_quick_command(c),
+                           bg='#95a5a6', fg='white', font=('Arial', 8),
+                           relief='flat', padx=8, pady=2)
+            btn.pack(side='left', padx=2)
             
-            for j in range(buttons_per_row):
-                if i + j < len(quick_commands):
-                    text, cmd = quick_commands[i + j]
-                    btn = tk.Button(row_frame, text=text, 
-                                   command=lambda c=cmd: self.set_quick_command(c),
-                                   bg='#95a5a6', fg='white', font=('Arial', 8),
-                                   relief='flat', padx=3, pady=2, width=12)
-                    btn.pack(side='left', padx=1, pady=1)
+            # Nueva línea cada 3 botones
+            if (i + 1) % 3 == 0 and i < len(quick_commands) - 1:
+                quick_buttons_frame = tk.Frame(quick_frame, bg='#34495e')
+                quick_buttons_frame.pack(fill='x', pady=2)
         
         # Área de salida de comandos
         output_frame = tk.Frame(console_frame, bg='#34495e')
@@ -371,42 +310,21 @@ class ADBFileManagerFixed:
         tk.Label(output_frame, text="Salida:", fg='#95a5a6', bg='#34495e', 
                 font=('Arial', 9)).pack(anchor='w')
         
-        self.command_output = scrolledtext.ScrolledText(output_frame, height=8, 
+        self.command_output = scrolledtext.ScrolledText(output_frame, height=6, 
                                                        bg='#1e1e1e', fg='#00ff00',
                                                        font=('Consolas', 9))
         self.command_output.pack(fill='x', pady=2)
         
-        # Frame de botones de la consola
-        console_btn_frame = tk.Frame(output_frame, bg='#34495e')
-        console_btn_frame.pack(fill='x', pady=2)
-        
-        tk.Button(console_btn_frame, text="🧹 Limpiar Salida", 
+        # Botón para limpiar salida
+        tk.Button(output_frame, text="🧹 Limpiar Salida", 
                  command=self.clear_command_output,
                  bg='#95a5a6', fg='white', font=('Arial', 9),
-                 relief='flat', padx=10).pack(side='left', padx=2)
-        
-        tk.Button(console_btn_frame, text="💾 Guardar Salida", 
-                 command=self.save_command_output,
-                 bg='#95a5a6', fg='white', font=('Arial', 9),
-                 relief='flat', padx=10).pack(side='left', padx=2)
-        
-        tk.Button(console_btn_frame, text="📋 Copiar Salida", 
-                 command=self.copy_command_output,
-                 bg='#95a5a6', fg='white', font=('Arial', 9),
-                 relief='flat', padx=10).pack(side='left', padx=2)
-        
-        tk.Button(console_btn_frame, text="⚠️ Kill Logcat", 
-                 command=self.kill_logcat,
-                 bg='#e74c3c', fg='white', font=('Arial', 9),
-                 relief='flat', padx=10).pack(side='right', padx=2)
+                 relief='flat').pack(pady=2)
     
     def set_quick_command(self, command):
         """Establecer comando rápido en el campo de entrada"""
-        if command == "clear":
-            self.clear_command_output()
-        else:
-            self.command_var.set(command)
-            self.command_entry.focus()
+        self.command_var.set(command)
+        self.command_entry.focus()
     
     def execute_custom_command(self):
         """Ejecutar comando ADB personalizado"""
@@ -459,60 +377,6 @@ class ADBFileManagerFixed:
         self.command_output.see(tk.END)
         self.root.update_idletasks()
     
-    def save_command_output(self):
-        """Guardar salida de comandos en archivo"""
-        output_text = self.command_output.get(1.0, tk.END)
-        if not output_text.strip():
-            messagebox.showwarning("Advertencia", "No hay salida para guardar")
-            return
-        
-        file_path = filedialog.asksaveasfilename(
-            title="Guardar salida de comandos",
-            defaultextension=".txt",
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
-        )
-        
-        if file_path:
-            try:
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(output_text)
-                self.log(f"✅ Salida guardada en: {os.path.basename(file_path)}")
-                messagebox.showinfo("Éxito", f"Salida guardada en:\n{file_path}")
-            except Exception as e:
-                self.log(f"❌ Error guardando salida: {e}")
-                messagebox.showerror("Error", f"No se pudo guardar:\n{e}")
-    
-    def copy_command_output(self):
-        """Copiar salida de comandos al portapapeles"""
-        output_text = self.command_output.get(1.0, tk.END)
-        if not output_text.strip():
-            messagebox.showwarning("Advertencia", "No hay salida para copiar")
-            return
-        
-        try:
-            self.root.clipboard_clear()
-            self.root.clipboard_append(output_text)
-            self.log("✅ Salida copiada al portapapeles")
-            messagebox.showinfo("Éxito", "Salida copiada al portapapeles")
-        except Exception as e:
-            self.log(f"❌ Error copiando: {e}")
-            messagebox.showerror("Error", f"No se pudo copiar:\n{e}")
-    
-    def kill_logcat(self):
-        """Matar proceso logcat si está ejecutándose"""
-        def kill_thread():
-            if platform.system() == "Windows":
-                # En Windows, matar procesos adb que puedan estar ejecutando logcat
-                self.run_command("taskkill /f /im adb.exe", timeout=5)
-            else:
-                # En Linux/Mac, matar procesos logcat
-                self.run_command("pkill -f logcat", timeout=5)
-            
-            self.log("⚠️ Procesos logcat terminados")
-            self.show_command_output("⚠️ Procesos logcat terminados\n")
-        
-        threading.Thread(target=kill_thread, daemon=True).start()
-    
     def clear_command_output(self):
         """Limpiar área de salida de comandos"""
         self.command_output.delete(1.0, tk.END)
@@ -524,7 +388,7 @@ class ADBFileManagerFixed:
                                  fg='#ecf0f1', bg='#34495e', bd=2)
         log_frame.pack(fill='both', expand=True, padx=10, pady=5)
         
-        self.log_text = scrolledtext.ScrolledText(log_frame, height=8, 
+        self.log_text = scrolledtext.ScrolledText(log_frame, height=6, 
                                                  bg='#1e1e1e', fg='#00ff00',
                                                  font=('Consolas', 9))
         self.log_text.pack(fill='both', expand=True, padx=5, pady=5)
@@ -579,15 +443,8 @@ class ADBFileManagerFixed:
         self.log_text.delete(1.0, tk.END)
     
     def run_command(self, command, timeout=30):
-        """Ejecutar comando usando ADB incluido"""
+        """Ejecutar comando"""
         try:
-            # Si el comando empieza con 'adb', usar el ADB incluido
-            if command.startswith('adb'):
-                adb_path = get_adb_path()
-                # Reemplazar 'adb' con la ruta completa
-                command = command.replace('adb', f'"{adb_path}"', 1)
-                self.log(f"🔧 Usando ADB: {adb_path}")
-            
             result = subprocess.run(command, shell=True, capture_output=True, 
                                   text=True, timeout=timeout)
             return result.returncode, result.stdout, result.stderr
@@ -598,33 +455,13 @@ class ADBFileManagerFixed:
     
     def check_adb(self):
         """Verificar ADB"""
-        adb_path = get_adb_path()
-        self.log(f"🔍 Buscando ADB en: {adb_path}")
-        
         code, stdout, stderr = self.run_command("adb version")
         if code == 0:
             version_info = stdout.split('\n')[0] if stdout else "Versión desconocida"
             self.log(f"✅ ADB disponible: {version_info}")
-            self.log(f"📁 Ruta ADB: {adb_path}")
             self.show_current_devices()
         else:
-            self.log("❌ ADB no encontrado")
-            self.log(f"🔍 Buscando en ubicaciones alternativas...")
-            
-            # Intentar encontrar ADB en otras ubicaciones
-            alternative_paths = [
-                os.path.join(os.path.dirname(sys.executable), "adb.exe"),
-                os.path.join(os.path.dirname(sys.executable), "adb_tools", "adb.exe"),
-                "./adb.exe",
-                "./adb_tools/adb.exe"
-            ]
-            
-            for path in alternative_paths:
-                if os.path.exists(path):
-                    self.log(f"✅ ADB encontrado en: {path}")
-                    return
-            
-            self.log("❌ Instala Android SDK Platform Tools o incluye adb.exe")
+            self.log("❌ ADB no encontrado - Instala Android SDK Platform Tools")
     
     def show_current_devices(self):
         """Mostrar dispositivos actuales"""

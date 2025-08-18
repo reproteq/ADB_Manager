@@ -6,10 +6,9 @@ import os
 import time
 import socket
 import platform
-import sys
 
 # ========== CONFIGURACIÓN GLOBAL ==========
-APP_VERSION = "1.2"
+APP_VERSION = "1.2.2"
 APP_TITLE = "ADB Manager"
 DEVELOPER = "Alex G.T"
 COMPANY = "REPROTEQ 2025"
@@ -18,33 +17,6 @@ DEFAULT_IP = "192.168.1.80"
 # CONFIGURACIÓN DE VENTANA
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 1000
-
-def get_resource_path(relative_path):
-    """Obtener ruta de recursos incluidos en el ejecutable"""
-    try:
-        # PyInstaller crea una carpeta temporal y almacena la ruta en _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    
-    return os.path.join(base_path, relative_path)
-
-def get_adb_path():
-    """Obtener ruta del adb.exe incluido"""
-    # Intentar diferentes ubicaciones
-    possible_paths = [
-        get_resource_path("adb_tools/adb.exe"),  # Empaquetado
-        get_resource_path("adb.exe"),            # En la raíz
-        os.path.join(os.path.dirname(sys.executable), "adb_tools", "adb.exe"),  # Junto al exe
-        os.path.join(os.path.dirname(sys.executable), "adb.exe"),  # Junto al exe directo
-        "adb"  # PATH del sistema (fallback)
-    ]
-    
-    for path in possible_paths:
-        if os.path.exists(path):
-            return path
-    
-    return "adb"  # Fallback al PATH del sistema
 
 class ADBFileManagerFixed:
     def __init__(self, root):
@@ -579,15 +551,8 @@ class ADBFileManagerFixed:
         self.log_text.delete(1.0, tk.END)
     
     def run_command(self, command, timeout=30):
-        """Ejecutar comando usando ADB incluido"""
+        """Ejecutar comando"""
         try:
-            # Si el comando empieza con 'adb', usar el ADB incluido
-            if command.startswith('adb'):
-                adb_path = get_adb_path()
-                # Reemplazar 'adb' con la ruta completa
-                command = command.replace('adb', f'"{adb_path}"', 1)
-                self.log(f"🔧 Usando ADB: {adb_path}")
-            
             result = subprocess.run(command, shell=True, capture_output=True, 
                                   text=True, timeout=timeout)
             return result.returncode, result.stdout, result.stderr
@@ -598,33 +563,13 @@ class ADBFileManagerFixed:
     
     def check_adb(self):
         """Verificar ADB"""
-        adb_path = get_adb_path()
-        self.log(f"🔍 Buscando ADB en: {adb_path}")
-        
         code, stdout, stderr = self.run_command("adb version")
         if code == 0:
             version_info = stdout.split('\n')[0] if stdout else "Versión desconocida"
             self.log(f"✅ ADB disponible: {version_info}")
-            self.log(f"📁 Ruta ADB: {adb_path}")
             self.show_current_devices()
         else:
-            self.log("❌ ADB no encontrado")
-            self.log(f"🔍 Buscando en ubicaciones alternativas...")
-            
-            # Intentar encontrar ADB en otras ubicaciones
-            alternative_paths = [
-                os.path.join(os.path.dirname(sys.executable), "adb.exe"),
-                os.path.join(os.path.dirname(sys.executable), "adb_tools", "adb.exe"),
-                "./adb.exe",
-                "./adb_tools/adb.exe"
-            ]
-            
-            for path in alternative_paths:
-                if os.path.exists(path):
-                    self.log(f"✅ ADB encontrado en: {path}")
-                    return
-            
-            self.log("❌ Instala Android SDK Platform Tools o incluye adb.exe")
+            self.log("❌ ADB no encontrado - Instala Android SDK Platform Tools")
     
     def show_current_devices(self):
         """Mostrar dispositivos actuales"""
