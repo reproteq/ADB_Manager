@@ -363,6 +363,7 @@ Las contribuciones son bienvenidas:
 
 ---
 
-**Desarrollado con ❤️ por Alex G.T para REPROTEQ 2025**
+**Desarrollado con ❤️ por Alex G.T para REPROTEQ 2025**  https://reproteq.com
 
 **¿Te gusta el proyecto? ⭐ Dale una estrella en GitHub**
+
